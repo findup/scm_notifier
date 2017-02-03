@@ -10,10 +10,12 @@ require 'sinatra/reloader'
 #DB = Sequel.connect('sqlite://test.db')
 DB = Sequel.connect('mysql2://mysql_user:mysql_pw@mysql/mysql_database')
 
-DB.create_table :items do
-  primary_key :id
-  String :name
-  Integer :price
+unless DB.table_exists?(:items)
+  DB.create_table :items do
+    primary_key :id
+    String :name
+    Integer :price
+  end
 end
 
 set :bind, '0.0.0.0' # webrick for remote host.
