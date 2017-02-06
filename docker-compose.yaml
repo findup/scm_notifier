@@ -32,7 +32,13 @@ services:
     container_name: mysql
 
   ruby:
-    build: ./ruby
+    build: 
+      context: ./ruby
+      args:
+      # docker build時にdockerfileへ透過させる環境変数
+        - http_proxy
+        - https_proxy
+        - no_proxy
     links: 
       - mysql
     environment:
