@@ -1,0 +1,27 @@
+<html>
+<title></title>
+<body>
+<script src="js/notify.js"></script>
+<script>
+    function fetchandnotify() {
+        url = 'fetch'
+        fetch(url).then(function(response) {
+            return response.json();
+        }).then(function(json) {
+            if (json.status == 'success') {
+                // jsonにJSONオブジェクトで結果が渡される
+                document.getElementById("list").textContent += json.desc + '\n';
+                // ブラウザ通知
+                spawnNotification(json.desc, '', json.app_name);
+            }
+            // delay後に自身を再呼び出し
+            setTimeout(fetchandnotify(), 1000);
+        });
+    }
+    fetchandnotify();
+</script>
+
+Notify list:<br/>
+<div id="list"></div>
+</body>
+</html>
