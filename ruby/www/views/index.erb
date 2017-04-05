@@ -1,5 +1,5 @@
 <html>
-<title></title>
+<title>Web notification sample aApplication.</title>
 <body>
 <script src="js/notify.js"></script>
 <script>
@@ -10,9 +10,9 @@
         }).then(function(json) {
             if (json.status == 'success') {
                 // jsonにJSONオブジェクトで結果が渡される
-                document.getElementById("list").textContent += json.desc + '\n';
+                document.getElementById("list").innerHTML += json.desc + '<br/>';
                 // ブラウザ通知
-                spawnNotification(json.desc, '', json.app_name);
+                spawnNotification(json.desc, 'icoon-mono.png', json.app_name);
             }
             // delay後に自身を再呼び出し
             setTimeout(fetchandnotify(), 1000);

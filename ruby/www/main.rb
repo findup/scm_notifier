@@ -52,7 +52,7 @@ get '/fetch' do
   i = 0
   while (myItems.nil? && i < 10) do
     myItems = items.where(:fetched => 0).first #未通知のレコードのうち最初の1件を取得
-    logger.info myItems
+#    logger.info myItems
     sleep 2 if myItems.nil?
     i = i + 1
   end
