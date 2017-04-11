@@ -38,6 +38,9 @@ get '/notify' do
   items = DB[:items] # Create a dataset
   # Populate the table
   items.insert(:app_name => app_name, :desc => desc, :fetched => 0)
+  # WEB APIを叩くだけなのでレスポンスする中身は特になし
+  status 200
+  body ''
 end
 
 # 通知リスト取得、通知トリガ
