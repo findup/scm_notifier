@@ -1,16 +1,16 @@
 version: '2'
 
 services:
-  nginx:
-    build: ./nginx
-    ports: 
-      - "8080:80"
-      - "443:443"
-    volumes:
+#  nginx:
+#    build: ./nginx
+#    ports: 
+#      - "8080:80"
+#      - "443:443"
+#    volumes:
 #      - ../:/var/www/html
-      - ../:/usr/share/nginx/html
-    container_name: nginx
-
+#      - ../:/usr/share/nginx/html
+#    container_name: nginx
+#
   data:
     image: busybox
     volumes:
