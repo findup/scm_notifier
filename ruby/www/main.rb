@@ -5,6 +5,8 @@ require 'sqlite3'
 require 'sinatra'
 require 'sinatra/reloader'
 require 'json'
+require 'yaml'
+require 'logger'
 
 #Bundler.require(:default)
 
@@ -13,6 +15,7 @@ require 'json'
 DB = Sequel.sqlite('notify.db')
 
 # テーブルが無かったら作る
+# 履歴DB
 unless DB.table_exists?(:items)
   DB.create_table :items do
     primary_key :id
@@ -21,6 +24,12 @@ unless DB.table_exists?(:items)
     Integer :fetched
   end
 end
+
+# 設定情報読み出し
+yaml = YAML.load_file("config.yml")
+url = yaml["repo_url"]
+logger = Logger.new(STDOUT)
+logger.info url
 
 set :bind, '0.0.0.0' # webrick for remote host.
 
