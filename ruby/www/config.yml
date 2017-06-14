@@ -1,0 +1,5 @@
+# 設定情報
+repo_url: http://aaa.com/repo
+scm: svn
+interval: 60
+backtrace: 10
