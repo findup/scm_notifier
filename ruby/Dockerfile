@@ -6,4 +6,5 @@ ARG no_proxy
 # ENV でコンテナ内の環境変数を設定
 ENV http_proxy=$http_proxy https_proxy=$https_proxy no_proxy=$no_proxy
 RUN apt-get update && apt-get install -y mysql-client
-RUN gem install mysql2 sqlite3 sequel sinatra sinatra-contrib
+#RUN gem install mysql2 sqlite3 sequel sinatra sinatra-contrib
+RUN gem install sequel sinatra sinatra-contrib
