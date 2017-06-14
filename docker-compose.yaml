@@ -57,4 +57,4 @@ services:
       - http_proxy
       - https_proxy
       - no_proxy
-    container_name: ruby
+    container_name: ruby2
