@@ -1,5 +1,13 @@
 # 設定情報
+# リポジトリURL
 repo_url: http://aaa.com/repo
-scm: svn
+# SCM種別
+scm: subversion
+# 更新間隔(秒)
 interval: 60
+# 過去ログ取得件数
 backtrace: 10
+# ユーザー名
+username:
+# パスワード
+password:
