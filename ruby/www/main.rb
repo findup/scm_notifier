@@ -10,8 +10,6 @@ require 'logger'
 
 #Bundler.require(:default)
 
-#DB = Sequel.connect('sqlite://test.db')
-#DB = Sequel.connect('mysql2://mysql_user:mysql_pw@mysql/mysql_database')
 DB = Sequel.sqlite('notify.db')
 
 # テーブルが無かったら作る
@@ -28,7 +26,7 @@ end
 # 設定情報読み出し
 yaml = YAML.load_file("config.yml")
 url = yaml["repo_url"]
-logger = Logger.new(STDOUT)
+logger = Logger.new(STDERR)
 logger.info url
 
 set :bind, '0.0.0.0' # webrick for remote host.
