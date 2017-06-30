@@ -7,7 +7,7 @@ scm: subversion
 interval: 60
 # 過去ログ取得件数
 backtrace: 10
-# ユーザー名
+# SCMユーザー名
 username:
-# パスワード
+# SCMパスワード
 password:
