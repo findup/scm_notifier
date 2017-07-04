@@ -7,6 +7,7 @@ require 'sinatra/reloader'
 require 'json'
 require 'yaml'
 require 'logger'
+require 'rexml/document'
 
 #Bundler.require(:default)
 
@@ -25,17 +26,51 @@ end
 
 # 設定情報読み出し
 yaml = YAML.load_file("config.yml")
-url = yaml["repo_url"]
-logger = Logger.new(STDERR)
-logger.info url
+@url = yaml["repo_url"]
+@username = yaml["username"]
+@password = yaml["password"]
+@interval = yaml["interval"]
+@proxy_host = yaml["proxy_host"]
+@proxy_port = yaml["proxy_port"]
+@logger = Logger.new(STDERR)
+@logger.info @url
 
 set :bind, '0.0.0.0' # webrick for remote host.
+
+def get_svn_list
+  # svnコマンド実行
+  svnCmd = "svn"
+  svnCmd << " --config-option=servers:global:http-proxy-host=#{@proxy_host}"
+  svnCmd << " --config-option=servers:global:http-proxy-port=#{@proxy_port}"
+  svnCmd << " --no-auth-cache"
+  svnCmd << " --username #{@username}"
+  svnCmd << " --password #{@password}"
+  svnCmd << " log"
+  svnCmd << " -l 5"
+  svnCmd << " --xml"
+  svnCmd << " -v"
+  svnCmd << " #{@url}"
+
+  @logger.info svnCmd
+  xml2 = `#{svnCmd}`
+  @logger.info xml2
+#  doc = REXML::Document.new(xml)
+end
+
+# バックグラウンドワーカー
+Thread.start do
+  loop do
+    get_svn_list()
+    sleep @interval
+  end
+end
 
 # デフォルトルート
 get '/' do
   "Hello sinatra"
 end
 
+=begin
 # メッセージ追加受付REST
 get '/notify' do
   app_name = params['app_name'] #アプリ名
@@ -49,6 +84,7 @@ get '/notify' do
   status 200
   body ''
 end
+=end
 
 # 通知リスト取得、通知トリガ
 get '/list' do

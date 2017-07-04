@@ -1,6 +1,6 @@
 # 設定情報
 # リポジトリURL
-repo_url: http://aaa.com/repo
+repo_url:
 # SCM種別
 scm: subversion
 # 更新間隔(秒)
@@ -11,3 +11,7 @@ backtrace: 10
 username:
 # SCMパスワード
 password:
+# プロキシホスト
+proxy_host:
+# プロキシポート
+proxy_port:
