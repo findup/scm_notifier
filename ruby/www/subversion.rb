@@ -19,11 +19,11 @@ end
 def get_svn_list
   # svnコマンド実行
   svnCmd = "svn"
-  svnCmd << " --config-option=servers:global:http-proxy-host=#{@proxy_host}"
-  svnCmd << " --config-option=servers:global:http-proxy-port=#{@proxy_port}"
+  svnCmd << " --config-option=servers:global:http-proxy-host=#{@proxy_host}" if !@proxy_host.nil?
+  svnCmd << " --config-option=servers:global:http-proxy-port=#{@proxy_port}" if !@proxy_port.nil?
   svnCmd << " --no-auth-cache"
-  svnCmd << " --username #{@username}"
-  svnCmd << " --password #{@password}"
+  svnCmd << " --username #{@username}" if !@username.nil?
+  svnCmd << " --password #{@password}" if !@password.nil?
   svnCmd << " log"
   svnCmd << " -l 10"
   svnCmd << " --xml"
@@ -37,11 +37,11 @@ def get_svn_list
 
   xml_hash = {}
 
-  doc.elements.each('log/logentry') do |station|
-    revision = station.attributes['revision']
-    author = station.elements['author'].text
-    date = station.elements['date'].text
-    msg = station.elements['msg'].text
+  doc.elements.each('log/logentry') do |entry|
+    revision = entry.attributes['revision']
+    author = entry.elements['author'].text
+    date = entry.elements['date'].text
+    msg = entry.elements['msg'].text
 
     ndate = Time.parse(date).getlocal
 
