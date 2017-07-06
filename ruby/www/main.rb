@@ -5,7 +5,6 @@ require 'sqlite3'
 require 'sinatra'
 require 'sinatra/reloader'
 require 'json'
-require 'yaml'
 require 'logger'
 require 'rexml/document'
 
@@ -20,21 +19,22 @@ DB = Sequel.sqlite('notify.db')
 unless DB.table_exists?(:items)
   DB.create_table :items do
     primary_key :id
-    String :app_name
-    String :desc
+    String :revision
+    String :author
+    String :msg
     Integer :fetched
   end
 end
 
-read_config()
+config = read_config()
 
 set :bind, '0.0.0.0' # webrick for remote host.
 
 # バックグラウンドワーカー
 Thread.start do
   loop do
-    get_svn_list()
-    sleep @interval
+    get_svn_list(config)
+    sleep config[:internval]
   end
 end
 
@@ -76,12 +76,12 @@ get '/fetch' do
     i = i + 1
   end
 
-unless (myItems.nil?) then
-  items.where(:id => myItems[:id]).update(:fetched => 1) # 通知済みレコードのフラグ更新
-  str = JSON.generate({"app_name" => myItems[:app_name], "desc" => myItems[:desc], "status" => "success"})
-else
-  str = JSON.generate("status" => "data none")
-end
+  unless (myItems.nil?) then
+    items.where(:id => myItems[:id]).update(:fetched => 1) # 通知済みレコードのフラグ更新
+    str = JSON.generate({"app_name" => myItems[:app_name], "desc" => myItems[:desc], "status" => "success"})
+  else
+    str = JSON.generate("status" => "data none")
+  end
 
 end
 

@@ -2,33 +2,22 @@ require 'yaml'
 require 'logger'
 require 'rexml/document'
 require 'time'
+require './config.rb'
 
-# 設定情報読み出し
-def read_config
-    yaml = YAML.load_file("config.yml")
-    @url = yaml["repo_url"]
-    @username = yaml["username"]
-    @password = yaml["password"]
-    @interval = yaml["interval"]
-    @proxy_host = yaml["proxy_host"]
-    @proxy_port = yaml["proxy_port"]
-    @logger = Logger.new(STDERR)
-    @logger.info @url
-end
-
-def get_svn_list
+def get_svn_list(config, base = nil)
   # svnコマンド実行
   svnCmd = "svn"
-  svnCmd << " --config-option=servers:global:http-proxy-host=#{@proxy_host}" if !@proxy_host.nil?
-  svnCmd << " --config-option=servers:global:http-proxy-port=#{@proxy_port}" if !@proxy_port.nil?
+  svnCmd << " --config-option=servers:global:http-proxy-host=#{config[:proxy_host]}" if !config[:proxy_host].nil?
+  svnCmd << " --config-option=servers:global:http-proxy-port=#{config[:proxy_port]}" if !config[:proxy_port].nil?
   svnCmd << " --no-auth-cache"
-  svnCmd << " --username #{@username}" if !@username.nil?
-  svnCmd << " --password #{@password}" if !@password.nil?
+  svnCmd << " --username #{config[:username]}" if !config[:username].nil?
+  svnCmd << " --password #{config[:password]}" if !config[:password].nil?
   svnCmd << " log"
   svnCmd << " -l 10"
   svnCmd << " --xml"
   svnCmd << " -v"
-  svnCmd << " #{@url}"
+  svnCmd << " -r #{base}:HEAD" if !base.nil?
+  svnCmd << " #{config[:url]}"
 
 #  @logger.info svnCmd
   xml = `#{svnCmd}`
@@ -53,8 +42,23 @@ def get_svn_list
     @logger.debug key
     @logger.debug value
   }
+
+  return xml_hash
 end
 
-read_config()
-get_svn_list()
+@logger = Logger.new(STDERR)
+
+config_hash = read_config()
+@logger.info config_hash[:url]
+
+#x_hash = {}
+x_hash = get_svn_list(config_hash)
+rev = x_hash.keys
+rev.sort
+@logger.debug rev[0]
+
+x_hash = get_svn_list(config_hash, rev[0])
+
+
+
 
