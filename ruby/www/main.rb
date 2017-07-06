@@ -33,7 +33,11 @@ set :bind, '0.0.0.0' # webrick for remote host.
 # バックグラウンドワーカー
 Thread.start do
   loop do
-    get_svn_list(config)
+    revisions = {}
+    revisions = get_svn_list(config)
+    items = DB[:items] # Create a dataset
+    items.insert(:revision => app_name, :desc => desc, :fetched => 0)
+
     sleep config[:internval]
   end
 end
