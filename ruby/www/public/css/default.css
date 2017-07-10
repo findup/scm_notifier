@@ -1,0 +1,8 @@
+table.rev_list {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table.rev_list tr td {
+    border: 1px solid #CCC;
+}
