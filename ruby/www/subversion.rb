@@ -16,12 +16,12 @@ def get_svn_list(config, base = nil)
   svnCmd << " -l 10"
   svnCmd << " --xml"
   svnCmd << " -v"
-  svnCmd << " -r #{base}:HEAD" if !base.nil?
+  svnCmd << " -r HEAD:#{base}" if !base.nil?
   svnCmd << " #{config[:url]}"
 
 #  @logger.info svnCmd
   xml = `#{svnCmd}`
-  @logger.info xml
+#  @logger.info xml
   doc = REXML::Document.new(xml)
 
   xml_hash = {}
@@ -34,14 +34,9 @@ def get_svn_list(config, base = nil)
 
     ndate = Time.parse(date).getlocal
 
-    entry = { "author"=>author, "date"=>ndate, "msg"=>msg }
+    entry = { :author => author, :date => ndate, :msg =>msg }
     xml_hash[revision] = entry
   end
-
-  xml_hash.each_pair{|key, value|
-    @logger.debug key
-    @logger.debug value
-  }
 
   return xml_hash
 end
