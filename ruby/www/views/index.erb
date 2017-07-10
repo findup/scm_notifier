@@ -1,5 +1,6 @@
 <html>
 <title>Web notification sample aApplication.</title>
+<link rel="stylesheet" href="css/default.css">
 <body>
 <script src="js/notify.js"></script>
 <script>
@@ -10,18 +11,32 @@
         }).then(function(json) {
             if (json.status == 'success') {
                 // jsonにJSONオブジェクトで結果が渡される
-                document.getElementById("list").innerHTML += json.desc + '<br/>';
+//                document.getElementById("list").innerHTML += json.desc + '<br/>';
                 // ブラウザ通知
                 spawnNotification(json.desc, 'icoon-mono.png', json.app_name);
             }
             // delay後に自身を再呼び出し
-            setTimeout(fetchandnotify(), 1000);
+            setTimeout(fetchandnotify(), 5000);
         });
     }
     fetchandnotify();
 </script>
 
-Notify list:<br/>
-<div id="list"></div>
+<div id="list">
+    <table class="rev_list">
+    <tr>
+        <th>revision</th>
+        <th>author</th>
+        <th>message</th>
+    </tr>
+    <% @items.each do |item| %>
+        <tr>
+            <td><%= item[:revision] %></td>
+            <td><%= item[:author] %></td>
+            <td><%= item[:msg] %></td
+        </tr>
+    <% end %>
+    </table>
+</div>
 </body>
 </html>
