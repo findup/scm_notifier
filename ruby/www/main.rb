@@ -20,9 +20,9 @@ DB = Sequel.sqlite('notify.db')
 # 履歴DB
 unless DB.table_exists?(:items)
   DB.create_table :items do
-    primary_key :id
-    String :revision
+    Integer :revision , :primary_key=>true
     String :author
+    DateTime :date
     String :msg
     Integer :fetched
   end
@@ -54,14 +54,14 @@ Thread.start do
 
       # 新規のリビジョンの個数数え
       rev_list.each_pair{ |key, value|
-        if key != newest
+        if items.where(:revision => key).count == 0
           # DBに追加
-          items.insert(:revision => key, :author => value[:author], :msg => value[:msg], :fetched => 0)
+          items.insert(:revision => key, :author => value[:author], :date => value[:date], :msg => value[:msg], :fetched => 0)
         end
       }
     end
 
-    sleep config[:internval]
+    sleep config[:interval]
   end
 end
 
@@ -88,29 +88,41 @@ end
 
 # 通知リスト取得、通知トリガ
 get '/list' do
-  @items = DB[:items].limit(10).all
+  @items = DB[:items].order(Sequel.desc(:revision)).limit(15).all
 #  logger.debug @items
   erb :index
 end
 
 # REST 通知オブジェクトをjsonで返す
 get '/fetch' do
+  base_rev = params['base_rev']  # クライアント側判断基準
+  logger.debug "base_rev:" + base_rev.to_s
+
   items = DB[:items]
   myItems = nil
-  i = 0
-  while (myItems.nil? && i < 10) do
-    myItems = items.where(:fetched => 0).first #未通知のレコードのうち最初の1件を取得
-#    logger.info myItems
-    sleep 2 if myItems.nil?
-    i = i + 1
+  if base_rev.nil?
+    myItems = items.order(Sequel.desc(:revision)).first
+    logger.debug "aaa " + myItems.to_s
+    str = JSON.generate({"author" => myItems[:author], "msg" => myItems[:msg], "newest_rev" => myItems[:revision], "status" => "success"})
+  else
+    myItems = items.where(Sequel.lit('revision > ?', base_rev)).all
+    newest_rev = items.max(:revision)
+
+    logger.debug "bbb " + myItems.to_s
+    #自リビジョンより新しいレコード
+    if myItems.length > 1
+      str = JSON.generate({"author" => "", "msg" => "#{myItems.length}個の更新がありました", "newest_rev" => newest_rev, "status" => "success"})
+    elsif myItems.length == 1
+      # 新規が1件
+      str = JSON.generate({"author" => myItems.first[:author], "msg" => myItems.first[:msg], "newest_rev" => newest_rev, "status" => "success"})
+    else
+      # 更新なし
+      str = JSON.generate("newest_rev" => newest_rev, "status" => "data none")
+    end
   end
 
-  unless (myItems.nil?) then
-#    items.where(:id => myItems[:id]).update(:fetched => 1) # 通知済みレコードのフラグ更新
-    str = JSON.generate({"app_name" => myItems[:app_name], "desc" => myItems[:desc], "status" => "success"})
-  else
-    str = JSON.generate("status" => "data none")
-  end
+#  logger.info myItems
+#  sleep 10 if myItems.nil?  # 更新がなければ待ち
 
 end
 

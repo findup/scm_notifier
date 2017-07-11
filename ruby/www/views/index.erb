@@ -4,19 +4,21 @@
 <body>
 <script src="js/notify.js"></script>
 <script>
-    function fetchandnotify() {
+    function fetchandnotify(base_rev = 0) {
         url = 'fetch'
+        if (base_rev != 0){
+            url += '?base_rev=' + base_rev
+        }
         fetch(url).then(function(response) {
             return response.json();
         }).then(function(json) {
             if (json.status == 'success') {
                 // jsonにJSONオブジェクトで結果が渡される
-//                document.getElementById("list").innerHTML += json.desc + '<br/>';
                 // ブラウザ通知
-                spawnNotification(json.desc, 'icoon-mono.png', json.app_name);
+                spawnNotification(json.msg, 'icoon-mono.png', json.author);
             }
             // delay後に自身を再呼び出し
-            setTimeout(fetchandnotify(), 5000);
+            setTimeout(fetchandnotify(json.newest_rev), 30000);
         });
     }
     fetchandnotify();
@@ -26,14 +28,16 @@
     <table class="rev_list">
     <tr>
         <th>revision</th>
+        <th>date</th>
         <th>author</th>
         <th>message</th>
     </tr>
     <% @items.each do |item| %>
         <tr>
             <td><%= item[:revision] %></td>
+            <td><%= item[:date] %></td>
             <td><%= item[:author] %></td>
-            <td><%= item[:msg] %></td
+            <td><%= item[:msg] %></td>
         </tr>
     <% end %>
     </table>
