@@ -17,6 +17,6 @@ function spawnNotification(theBody, theIcon, theTitle) {
       icon: theIcon
   }
   var n = new Notification(theTitle,options);
-  setTimeout(n.close.bind(n), 30 * 1000);
+  setTimeout(n.close.bind(n), 30 * 60 * 1000);  // 30minuts
 }
 
