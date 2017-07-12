@@ -14,15 +14,15 @@ require './subversion.rb'
 
 logger = Logger.new(STDERR)
 
-DB = Sequel.sqlite('notify.db')
+DB = Sequel.sqlite('revision.db')
 
 # テーブルが無かったら作る
 # 履歴DB
-unless DB.table_exists?(:items)
-  DB.create_table :items do
+unless DB.table_exists?(:revisions)
+  DB.create_table :revisions do
     Integer :revision , :primary_key=>true
     String :author
-    DateTime :date
+    String :date
     String :msg
     Integer :fetched
   end
@@ -41,7 +41,7 @@ Thread.start do
     rev_list = {}
     rev_list = get_svn_list(config, base_rev)
 
-    items = DB[:items] # Create a dataset
+    items = DB[:revisions] # Create a dataset
 
     # DBの最新リビジョンから更新があったか比較
     newest = items.max(:revision)
@@ -88,8 +88,7 @@ end
 
 # 通知リスト取得、通知トリガ
 get '/list' do
-  @items = DB[:items].order(Sequel.desc(:revision)).limit(15).all
-#  logger.debug @items
+  @items = DB[:revisions].order(Sequel.desc(:revision)).limit(config[:backtrace]).all
   erb :index
 end
 
@@ -98,17 +97,15 @@ get '/fetch' do
   base_rev = params['base_rev']  # クライアント側判断基準
   logger.debug "base_rev:" + base_rev.to_s
 
-  items = DB[:items]
-  myItems = nil
+  items = DB[:revisions]
   if base_rev.nil?
-    myItems = items.order(Sequel.desc(:revision)).first
-    logger.debug "aaa " + myItems.to_s
-    str = JSON.generate({"author" => myItems[:author], "msg" => myItems[:msg], "newest_rev" => myItems[:revision], "status" => "success"})
+    # base_rev が存在しない(初回、もしくはリロード時）はnotificationを出さないようにする
+    newest_rev = items.max(:revision)
+    str = JSON.generate({"newest_rev" => newest_rev, "status" => "first"})
   else
     myItems = items.where(Sequel.lit('revision > ?', base_rev)).all
     newest_rev = items.max(:revision)
 
-    logger.debug "bbb " + myItems.to_s
     #自リビジョンより新しいレコード
     if myItems.length > 1
       str = JSON.generate({"author" => "", "msg" => "#{myItems.length}個の更新がありました", "newest_rev" => newest_rev, "status" => "success"})
@@ -121,8 +118,13 @@ get '/fetch' do
     end
   end
 
-#  logger.info myItems
-#  sleep 10 if myItems.nil?  # 更新がなければ待ち
+logger.debug str
 
+  return str
 end
 
+# setting screen
+get '/settings' do
+
+
+end

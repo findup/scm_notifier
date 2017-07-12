@@ -1,12 +1,12 @@
 <html>
-<title>Web notification sample aApplication.</title>
+<title>subversion commit nofification</title>
 <link rel="stylesheet" href="css/default.css">
 <body>
 <script src="js/notify.js"></script>
 <script>
     function fetchandnotify(base_rev = 0) {
         url = 'fetch'
-        if (base_rev != 0){
+        if (base_rev != 0) {
             url += '?base_rev=' + base_rev
         }
         fetch(url).then(function(response) {
@@ -16,9 +16,12 @@
                 // jsonにJSONオブジェクトで結果が渡される
                 // ブラウザ通知
                 spawnNotification(json.msg, 'icoon-mono.png', json.author);
+                // リスト画面リロード
+                location.reload();
             }
             // delay後に自身を再呼び出し
-            setTimeout(fetchandnotify(json.newest_rev), 30000);
+            // setTimeoutのコールバックに引数を渡すには無名関数でラップしないと正しくdelayしない
+            setTimeout(function(){fetchandnotify(json.newest_rev)}, 30 * 1000);
         });
     }
     fetchandnotify();
