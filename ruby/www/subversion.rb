@@ -13,7 +13,7 @@ def get_svn_list(config, base = nil)
   svnCmd << " --username #{config[:username]}" if !config[:username].nil?
   svnCmd << " --password #{config[:password]}" if !config[:password].nil?
   svnCmd << " log"
-  svnCmd << " -l 10"
+  svnCmd << " -l #{config[:backtrace]}"
   svnCmd << " --xml"
   svnCmd << " -v"
   svnCmd << " -r HEAD:#{base}" if !base.nil?
@@ -32,7 +32,7 @@ def get_svn_list(config, base = nil)
     date = entry.elements['date'].text
     msg = entry.elements['msg'].text
 
-    ndate = Time.parse(date).getlocal
+    ndate = Time.parse(date).getlocal  # UTC->JST
 
     entry = { :author => author, :date => ndate, :msg =>msg }
     xml_hash[revision] = entry
@@ -41,6 +41,7 @@ def get_svn_list(config, base = nil)
   return xml_hash
 end
 
+# ==== debug. ====
 @logger = Logger.new(STDERR)
 
 config_hash = read_config()
