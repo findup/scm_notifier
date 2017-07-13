@@ -12,56 +12,58 @@ require './subversion.rb'
 
 #Bundler.require(:default)
 
-logger = Logger.new(STDERR)
+configure do
+  logger = Logger.new(STDERR)
+  set :DB, Sequel.sqlite('revision.db')
 
-DB = Sequel.sqlite('revision.db')
-
-# テーブルが無かったら作る
-# 履歴DB
-unless DB.table_exists?(:revisions)
-  DB.create_table :revisions do
-    Integer :revision , :primary_key=>true
-    String :author
-    String :date
-    String :msg
-    Integer :fetched
-  end
-end
-
-config = read_config()
-
-set :bind, '0.0.0.0' # webrick for remote host.
-
-# バックグラウンドワーカー
-Thread.start do
-
-  base_rev = 1
-
-  loop do
-    rev_list = {}
-    rev_list = get_svn_list(config, base_rev)
-
-    items = DB[:revisions] # Create a dataset
-
-    # DBの最新リビジョンから更新があったか比較
-    newest = items.max(:revision)
-#    logger.debug newest
-    logger.debug rev_list.max[0]
-
-    if newest != rev_list.max[0]
-      # 更新あり
-      logger.debug "repository is update."
-
-      # 新規のリビジョンの個数数え
-      rev_list.each_pair{ |key, value|
-        if items.where(:revision => key).count == 0
-          # DBに追加
-          items.insert(:revision => key, :author => value[:author], :date => value[:date], :msg => value[:msg], :fetched => 0)
-        end
-      }
+  # テーブルが無かったら作る
+  unless settings.DB.table_exists?(:revisions)
+    settings.DB.create_table :revisions do
+      Integer :revision , :primary_key=>true
+      String :author
+      String :date
+      String :msg
+      Integer :fetched
     end
+  end
 
-    sleep config[:interval]
+  set :config, read_config()
+
+  set :bind, '0.0.0.0' # webrick for remote host.
+
+  # バックグラウンドワーカー
+  Thread.start do
+    logger.debug "subversion watch worker start."
+
+    base_rev = 1
+
+    loop do
+      rev_list = {}
+      rev_list = get_svn_list(settings.config, base_rev)
+
+      logger.debug rev_list.first
+
+      items = settings.DB[:revisions] # Create a dataset
+
+      # DBの最新リビジョンから更新があったか比較
+      newest_db = items.max(:revision)
+      newest_repo = rev_list.max[0]
+
+      if newest_db != newest_repo.to_i
+        # 更新あり
+        logger.debug "repository is update."
+
+        # 新規のリビジョンの個数数え
+        rev_list.each_pair{ |key, value|
+          if items.where(:revision => key).count == 0
+            # DBに追加
+            items.insert(:revision => key, :author => value[:author], :date => value[:date], :msg => value[:msg], :fetched => 0)
+          end
+        }
+      end
+
+      sleep settings.config[:interval]
+    end
   end
 end
 
@@ -88,7 +90,7 @@ end
 
 # 通知リスト取得、通知トリガ
 get '/list' do
-  @items = DB[:revisions].order(Sequel.desc(:revision)).limit(config[:backtrace]).all
+  @items = settings.DB[:revisions].order(Sequel.desc(:revision)).limit(settings.config[:backtrace]).all
   erb :index
 end
 
@@ -97,7 +99,7 @@ get '/fetch' do
   base_rev = params['base_rev']  # クライアント側判断基準
   logger.debug "base_rev:" + base_rev.to_s
 
-  items = DB[:revisions]
+  items = settings.DB[:revisions]
   if base_rev.nil?
     # base_rev が存在しない(初回、もしくはリロード時）はnotificationを出さないようにする
     newest_rev = items.max(:revision)
