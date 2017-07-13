@@ -13,10 +13,10 @@ window.addEventListener('load', function () {
 // Notification表示
 function spawnNotification(theBody, theIcon, theTitle) {
   var options = {
-      body: theBody,
-      icon: theIcon
+    body: theBody,
+    icon: theIcon
   }
-  var n = new Notification(theTitle,options);
+  var n = new Notification(theTitle, options);
   setTimeout(n.close.bind(n), 30 * 60 * 1000);  // 30minuts
 }
 
