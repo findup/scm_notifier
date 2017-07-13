@@ -21,7 +21,7 @@
             }
             // delay後に自身を再呼び出し
             // setTimeoutのコールバックに引数を渡すには無名関数でラップしないと正しくdelayしない
-            setTimeout(function(){fetchandnotify(json.newest_rev)}, 30 * 1000);
+            setTimeout(function(){fetchandnotify(json.newest_rev)}, 50 * 1000);
         });
     }
     fetchandnotify();
@@ -40,7 +40,7 @@
             <td><%= item[:revision] %></td>
             <td><%= item[:date] %></td>
             <td><%= item[:author] %></td>
-            <td><%= item[:msg] %></td>
+            <td><%= item[:msg].gsub(/\r\n|\r|\n/, "<br />")  %></td>
         </tr>
     <% end %>
     </table>
