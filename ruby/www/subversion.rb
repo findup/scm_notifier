@@ -32,7 +32,7 @@ def get_svn_list(config, base = nil)
     date = entry.elements['date'].text
     msg = entry.elements['msg'].text
 
-    ndate = Time.parse(date).getlocal("+09:00")  # UTC->JST
+    ndate = Time.parse(date).getlocal("+09:00").strftime("%F %T")  # UTC->JST
 
     entry = { :author => author, :date => ndate, :msg =>msg }
     xml_hash[revision] = entry
