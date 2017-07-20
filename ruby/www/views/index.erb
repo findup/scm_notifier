@@ -16,8 +16,9 @@
                 // jsonにJSONオブジェクトで結果が渡される
                 // ブラウザ通知
                 spawnNotification(json.msg, 'icoon-mono.png', json.author);
-                // リスト画面リロード
-                location.reload();
+                console.debug('notification shown.');
+                // リスト画面リロード（遅延実行）
+                setTimeout(function(){ location.reload(); }, 3 * 1000);
             }
             // delay後に自身を再呼び出し
             // setTimeoutのコールバックに引数を渡すには無名関数でラップしないと正しくdelayしない
