@@ -7,8 +7,13 @@ require 'sinatra/reloader'
 require 'json'
 require 'logger'
 require 'rexml/document'
-
+require './sinatra_ssl'
 require './subversion.rb'
+
+set :bind, '0.0.0.0' # webrick for remote host.
+set :ssl_certificate, "csr.pem"
+set :ssl_key, "pkey.pem"
+set :port, 9494
 
 #Bundler.require(:default)
 
@@ -28,8 +33,6 @@ configure do
   end
 
   set :config, read_config()
-
-  set :bind, '0.0.0.0' # webrick for remote host.
 
   # バックグラウンドワーカー
   Thread.start do
@@ -69,7 +72,7 @@ end
 
 # デフォルトルート
 get '/' do
-  "Hello sinatra"
+  "Hello world."
 end
 
 =begin

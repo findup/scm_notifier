@@ -52,6 +52,7 @@ services:
     command: 'ruby main.rb'
     ports:
       - "4567:4567"
+      - "9494:9494"
     environment:
     # proxy系の環境変数はホスト側の設定を参照
       - http_proxy
