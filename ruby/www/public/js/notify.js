@@ -15,8 +15,8 @@ function spawnNotification(theBody, theIcon, theTitle) {
   var options = {
     body: theBody,
     icon: theIcon,
-    requireInteraction: true,
-    tag: 'scm-notigication'
+    requireInteraction: true
+//    tag: 'scm-notigication'
   }
   var n = new Notification(theTitle, options);
   setTimeout(n.close.bind(n), 30 * 60 * 1000);  // 30minuts
